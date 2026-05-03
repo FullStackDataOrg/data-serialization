@@ -1,29 +1,46 @@
-%%{init: {'theme': 'base', 'themeVariables': {'fontSize': '16px'}}}%%
-flowchart LR
-    A[generate.py\nseeded synthetic data\n50k payment events] --> B[(data/events_v1.pkl\nin-memory DataFrame)]
+flowchart TD
+    %% ── Data Generation ──────────────────────────────────
+    subgraph GEN["⚙️  Data Generation"]
+        A["generate.py\n─────────────\nSeeded synthetic data\n50k payment events"]
+        B[("events_v1.pkl\n─────────────\nIn-memory DataFrame")]
+    end
 
-    B --> C[benchmark.py]
+    %% ── Format Benchmark ─────────────────────────────────
+    subgraph BENCH["📊  Format Benchmark"]
+        C["benchmark.py\n─────────────\nOrchestrates all writers\n& readers"]
 
-    C --> D[json_writer.py\nNDJSON row-per-line]
-    C --> E[csv_writer.py\nheader + text rows]
-    C --> F[avro_writer.py\nbinary row-oriented\nschema in file header]
-    C --> G[parquet_writer.py\nbinary columnar\nsnappy compressed]
+        subgraph WRITERS["Writers"]
+            D["json_writer.py\nNDJSON · row-per-line"]
+            E["csv_writer.py\nheader + text rows"]
+            F["avro_writer.py\nbinary row-oriented\nschema in header"]
+            G["parquet_writer.py\nbinary columnar\nSnappy compressed"]
+        end
 
-    D --> H[metrics\nsize / write / read / col scan]
-    E --> H
-    F --> H
-    G --> H
+        H["Metrics Collector\n─────────────\nfile size · write time\nread time · col scan time"]
+        I["comparison table\ntabulate output"]
+    end
 
-    H --> I[comparison table\ntabulate output]
+    %% ── Schema Evolution ─────────────────────────────────
+    subgraph EVOLVE["🔬  Schema Evolution"]
+        J["evolve.py\n─────────────\n100-row V1 sample"]
 
-    B --> J[evolve.py\n100-row V1 sample]
+        subgraph EXPERIMENTS["Experiments"]
+            K["Exp 1\nAdd nullable column"]
+            L["Exp 2\nRemove column"]
+            M["Exp 3\nRename column"]
+            N["Exp 4\nChange column type"]
+        end
 
-    J --> K[Experiment 1\nadd nullable column]
-    J --> L[Experiment 2\nremove column]
-    J --> M[Experiment 3\nrename column]
-    J --> N[Experiment 4\nchange column type]
+        O["Evolution Report\n─────────────\nOK / ERR per format"]
+    end
 
-    K --> O[evolution report\nOK / ERR per format]
-    L --> O
-    M --> O
-    N --> O
+    %% ── Edges ────────────────────────────────────────────
+    A --> B
+    B --> C
+    C --> D & E & F & G
+    D & E & F & G --> H
+    H --> I
+
+    B --> J
+    J --> K & L & M & N
+    K & L & M & N --> O
