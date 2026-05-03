@@ -1,0 +1,28 @@
+flowchart TD
+    A[generate.py\nseeded synthetic data\n50k payment events] --> B[(data/events_v1.pkl\nin-memory DataFrame)]
+
+    B --> C[benchmark.py]
+
+    C --> D[json_writer.py\nNDJSON row-per-line]
+    C --> E[csv_writer.py\nheader + text rows]
+    C --> F[avro_writer.py\nbinary row-oriented\nschema in file header]
+    C --> G[parquet_writer.py\nbinary columnar\nsnappy compressed]
+
+    D --> H[metrics\nsize / write / read / col scan]
+    E --> H
+    F --> H
+    G --> H
+
+    H --> I[comparison table\ntabulate output]
+
+    B --> J[evolve.py\n100-row V1 sample]
+
+    J --> K[Experiment 1\nadd nullable column]
+    J --> L[Experiment 2\nremove column]
+    J --> M[Experiment 3\nrename column]
+    J --> N[Experiment 4\nchange column type]
+
+    K --> O[evolution report\nOK / ERR per format]
+    L --> O
+    M --> O
+    N --> O
